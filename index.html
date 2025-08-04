@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Report Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <form id="salesForm" class="space-y-6 bg-white p-6 rounded shadow-md max-w-4xl mx-auto">
+    
+    <!-- Booking Section -->
+    <div class="border rounded-lg p-4">
+      <h2 class="font-semibold mb-2">Booking Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <select name="bookingType" required class="border rounded p-2">
+          <option value="">Select Booking Type</option>
+          <option>New Booking</option>
+          <option>Modification</option>
+          <option>Cancellation</option>
+          <option>Installment</option>
+        </select>
+        <input name="date" type="date" class="border rounded p-2" required />
+        <input name="agentName" type="text" placeholder="Agent Name" class="border rounded p-2" required />
+        <input name="region" type="text" placeholder="Region" class="border rounded p-2" required />
+      </div>
+    </div>
+
+    <!-- Customer Section -->
+    <div class="border rounded-lg p-4">
+      <h2 class="font-semibold mb-2">Customer Information</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input name="customerName" type="text" placeholder="Customer Name" class="border rounded p-2" required />
+        <input name="customerNationality" type="text" placeholder="Nationality" class="border rounded p-2" required />
+        <input name="customerMobile" type="tel" placeholder="Mobile Number" class="border rounded p-2" required />
+        <select name="source" class="border rounded p-2" required>
+          <option value="">How did the customer reach us?</option>
+          <option>Call</option>
+          <option>Chat</option>
+          <option>Returning Customer</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Service Section -->
+    <div class="border rounded-lg p-4">
+      <h2 class="font-semibold mb-2">Service</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input name="bookingId" type="text" placeholder="Booking ID" class="border rounded p-2" required />
+        <select name="service" class="border rounded p-2" required>
+          <option value="">Service</option>
+          <option>Flight</option>
+          <option>Hotel</option>
+          <option>Transfer</option>
+        </select>
+        <select name="provider" class="border rounded p-2" required>
+          <option value="">Service Provider</option>
+          <option>Smile</option>
+          <option>TBO</option>
+          <option>TDS</option>
+        </select>
+        <input name="destination" type="text" placeholder="Destination" class="border rounded p-2" required />
+        <input name="checkIn" type="date" class="border rounded p-2" />
+        <input name="paxNumber" type="number" placeholder="Number of Pax" class="border rounded p-2" required />
+      </div>
+    </div>
+
+    <!-- Payment Section -->
+    <div class="border rounded-lg p-4">
+      <h2 class="font-semibold mb-2">Payment</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <select name="currency" class="border rounded p-2" required>
+          <option value="">Currency</option>
+          <option>SAR</option>
+          <option>KWD</option>
+          <option>AED</option>
+        </select>
+        <input name="netRate" type="number" placeholder="Net Rate" class="border rounded p-2" required />
+        <input name="sellingRate" type="number" placeholder="Selling Rate" class="border rounded p-2" required />
+        <select name="paymentMethod" id="paymentMethod" class="border rounded p-2" required>
+          <option value="">Payment Method</option>
+          <option value="Payment Link">Payment Link</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+
+        <input id="paymentLinkField" name="paymentLink" type="url" placeholder="Payment Link URL" class="border rounded p-2 hidden col-span-2" />
+        <input id="bankFileField" name="bankFile" type="file" class="border rounded p-2 hidden col-span-2" accept="application/pdf,image/*" />
+
+        <select name="installment" id="installment" class="border rounded p-2">
+          <option value="No">Is this an installment?</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+        <input name="installmentPaid" type="number" placeholder="Paid Amount" class="border rounded p-2" />
+        <input name="dueDate" type="date" placeholder="Due Date" class="border rounded p-2" />
+        <input name="installmentRemaining" id="installmentRemaining" type="number" placeholder="Remaining Amount" class="border rounded p-2 hidden" readonly />
+      </div>
+    </div>
+
+    <!-- Attachments & Notes -->
+    <div class="border rounded-lg p-4">
+      <h2 class="font-semibold mb-2">Attachments & Notes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="file" name="voucherFile" class="border rounded p-2" accept="application/pdf,image/*" />
+        <input type="file" name="invoiceFile" class="border rounded p-2" accept="application/pdf,image/*" />
+        <textarea name="remarks" placeholder="Remarks" class="border rounded p-2"></textarea>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="text-center">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Submit</button>
+      <div id="successMessage" class="hidden text-green-600 font-semibold mt-4">Form submitted successfully!</div>
+    </div>
+  </form>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_URL/exec";
+
+    document.getElementById('salesForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const netRate = parseFloat(form.querySelector("input[name='netRate']").value);
+      const sellingRate = parseFloat(form.querySelector("input[name='sellingRate']").value);
+      if (sellingRate < netRate) {
+        alert("Selling rate cannot be less than net rate.");
+        return;
+      }
+
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .then(response => {
+          document.getElementById("successMessage").classList.remove("hidden");
+          setTimeout(() => {
+            document.getElementById("successMessage").classList.add("hidden");
+          }, 5000);
+          form.reset();
+          document.getElementById("installmentRemaining").classList.add("hidden");
+          document.getElementById("paymentLinkField").classList.add("hidden");
+          document.getElementById("bankFileField").classList.add("hidden");
+        })
+        .catch(error => alert('Error submitting form: ' + error.message));
+    });
+
+    function calculateRemaining() {
+      const sellingRate = parseFloat(document.querySelector("input[name='sellingRate']").value) || 0;
+      const paid = parseFloat(document.querySelector("input[name='installmentPaid']").value) || 0;
+      const remaining = Math.max(sellingRate - paid, 0);
+      const remainingField = document.getElementById("installmentRemaining");
+      remainingField.value = remaining.toFixed(2);
+      remainingField.classList.toggle("hidden", remaining <= 0);
+    }
+
+    document.querySelector("input[name='sellingRate']").addEventListener('input', calculateRemaining);
+    document.querySelector("input[name='installmentPaid']").addEventListener('input', calculateRemaining);
+
+    document.getElementById("installment").addEventListener("change", function(e) {
+      const isInstallment = e.target.value === "Yes";
+      const paidField = document.querySelector("input[name='installmentPaid']");
+      const remainingField = document.getElementById("installmentRemaining");
+
+      paidField.required = isInstallment;
+      remainingField.classList.toggle("hidden", !isInstallment);
+      if (!isInstallment) remainingField.value = "";
+    });
+
+    document.getElementById("paymentMethod").addEventListener("change", function(e) {
+      const method = e.target.value;
+      const linkField = document.getElementById("paymentLinkField");
+      const fileField = document.getElementById("bankFileField");
+
+      linkField.classList.add("hidden");
+      fileField.classList.add("hidden");
+
+      if (method === "Payment Link") {
+        linkField.classList.remove("hidden");
+      } else if (method === "Bank Transfer") {
+        fileField.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
